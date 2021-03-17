@@ -5,6 +5,7 @@
   - [Практическая работа 1](ООП/Practical_work_1/Practical_work_1/Practical_work_1.cpp)
   - [Практическая работа 2](ООП/Practical_work_2/Practical_work_2.cpp)
   - [Практическая работа 3](ООП/Practical_work_3/Practical_work_3.cpp)
+  - [Практическая работа 4](ООП/Practical_work_4/Practical_work_4.cpp)
 
 - ### НИР
   - [Практическая работа 1](НИР/homework_1.R)
