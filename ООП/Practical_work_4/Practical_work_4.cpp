@@ -1,4 +1,6 @@
-﻿#include <iostream>
+﻿// КМБО-01-20, Гребнев Никита, 5 вариант.
+
+#include <iostream>
 
 using namespace std;
 
