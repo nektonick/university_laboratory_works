@@ -15,6 +15,9 @@ public:
 		cout<< "Доктор-" << specialty << " " << surname << " " << name
 			<< ", занимает должность " << post << ", имеет стаж " << experience << " лет и рейтинг " << rating << " баллов\n";
 	}
+	virtual ~Doctor() {
+
+	}
 protected:
 	string surname; // фамилия
 	string name; // имя
@@ -30,6 +33,9 @@ private:
 	Element* next;
 	Element* prev;
 public:
+	virtual ~Element() {
+
+	}
 	Element(string input_surname = "no surname", string  input_name = "no name", string input_specialty = "no specialty", string  input_post = "no post", double  input_experience = 0, double  input_rating = 0) :
 		Doctor(input_surname, input_name, input_specialty, input_post, input_experience, input_rating), next(nullptr), prev(nullptr) {};
 
@@ -106,7 +112,7 @@ public:
 		}
 		else {
 			if (num == 1) { // 1 элемент в списке => вставка либо в конец, либо в начало
-				if (begin->operator<(*newEl)) { //	вставка в конец
+				if ((*begin) <(*newEl)) { //	вставка в конец
 					begin->setNext(newEl);
 					newEl->setPrevious(begin);
 					end = newEl;
@@ -119,27 +125,26 @@ public:
 				}
 			}
 			else { // больше 1 элемента в списке
-				if ((*newEl).operator<(*begin) ) {
+				if ((*newEl)<(*begin) ) {
 					newEl->setNext(begin);
 					begin->setPrevious(newEl);
 					begin = newEl;
 				}
 				else {
-					if (end->operator<(*newEl)) {
+					if ((*end)<(*newEl)) {
 						newEl->setPrevious(end);
 						end->setNext(newEl);
 						end = newEl;
 					}
 					else {
 						Element* cur = begin;
-						while (cur->getNext() != nullptr && (*cur).operator<(*newEl)) {
-							if (cur->getNext()->operator<(*newEl)) {
+						while (cur->getNext() != nullptr && (*cur)<(*newEl)) {
+							if ((*(cur->getNext())) <(*newEl)) {
 								cur = cur->getNext();
 							}
 							else {
 								break;
 							}
-							
 						}
 						// здесь newEl > cur && newEl < cur->getNext()
 						newEl->setNext(cur->getNext());
@@ -154,7 +159,6 @@ public:
 						}
 					}
 				}
-				
 			}
 		}
 		++num;
