@@ -1,34 +1,81 @@
 ﻿// КМБО-01-20, Гребнев Никита, 5 вариант.
 #include <iostream>
 #include <fstream>
+#include <string>
 
 using namespace std;
-class Exception : public std::exception
+class MatrixException : public std::exception
 {
 protected:
-	//сообщение об ошибке
-	char* str;
+	string info; //сообщение об ошибке
 public:
-	Exception(const char* s)
-	{
-		str = new char[strlen(s) + 1];
-		strcpy_s(str, strlen(s) + 1, s);
+	MatrixException(const char* s)	{
+		info = string(s);
 	}
-	Exception(const Exception& e)
-	{
-		str = new char[strlen(e.str) + 1];
-		strcpy_s(str, strlen(e.str) + 1, e.str);
+	MatrixException(string s)	{
+		info = s;
 	}
-	~Exception()
-	{
-		delete[] str;
+	MatrixException(const MatrixException& e)	{
+		info = e.info;
 	}
-	//функцию вывода можно будет переопределить в производных классах, когда будет ясна конкретика
-		virtual void print()
-	{
-		cout << "Exception: " << str;
+	virtual ~MatrixException() {
+		
+	}
+	virtual void print() const	{
+		cout << info << endl;
 	}
 };
+
+class IndexOutOfBoundsException : public MatrixException
+{
+protected:
+	int index_row, index_column;
+public:
+	IndexOutOfBoundsException(string s, int r, int c) : MatrixException(s) {
+		index_row = r; index_column = c;
+	}
+	virtual void print() const {
+		cout << info << " Элемент с индексом ("<<index_row<<","<<index_column<<") находится вне границ матрицы" << endl;
+	}
+};
+
+class IncompatibleMatrixDimensionsException : public MatrixException 
+{
+protected:
+	int h1, w1, h2, w2;
+public:
+	IncompatibleMatrixDimensionsException(string s, int ih1, int iw1, int ih2, int iw2) : MatrixException(s), h1(ih1), w1(iw1), h2(ih2), w2(iw2) {	}
+	virtual void print() const {
+		cout << info << "Размерности " << "(" << h1 << "," << w1 << ") и" << "(" << h2 << "," << w2 << ") несовместимы\n";
+	}
+};
+
+// На схеме IncompatibleMatrixDimensionsException наследуется от WrongDimensionsException, 
+// но при моей реализации класса IncompatibleMatrixDimensionsException класс WrongMatrixSizeException лучше наследовать от MatrixException, 
+// поскольку нет второй матрицы, размеры которой были бы несовместимы с данной
+class WrongMatrixSizeException : public MatrixException 
+{
+protected:
+	int h, w;
+public:
+	WrongMatrixSizeException(string s, int ih, int iw) : MatrixException(s), h(ih), w(iw) {	}
+	virtual void print() const {
+		cout << info << "Неверный размер матрицы: " << "(" << h << "," << w << ")\n";
+	}
+};
+
+// Класс исключения для функции delete_zero_lines() 
+class ZeroMatrixException : public WrongMatrixSizeException
+{
+protected:
+public:
+	ZeroMatrixException(string s, int ih, int iw) : WrongMatrixSizeException(s, ih, iw){ }
+	virtual void print() const {
+		cout << info << "Матрицы с размерами: " << "(" << h << "," << w << ") оказалась полностью заполнена нулями. При удалении всех строк получется матрица с нелевыми размерами.\n";
+	}
+};
+
+
 class BaseMatrix
 {
 protected:
@@ -39,7 +86,7 @@ public:
 	BaseMatrix(int Height = 2, int Width = 2)
 	{
 		if (Height <= 0 || Width <= 0)
-			throw Exception("Non-positive size of matrix");
+			throw WrongMatrixSizeException("Ошибка в конструкторе BaseMatrix(int Height = 2, int Width = 2)\n", Height, Width);
 		height = Height;
 		width = Width;
 		ptr = new double* [height];
@@ -81,7 +128,7 @@ public:
 	}
 	virtual double& operator()(int row, int column) const
 	{
-		if (row < 0 || column < 0 || row >= height || column >= width)throw Exception("Index is out of bounds");
+		if (row < 0 || column < 0 || row >= height || column >= width)throw IndexOutOfBoundsException("Ошибка в operator()(int row, int column)\n", row, column);
 		return ptr[row][column];
 	}
 	friend ostream& operator << (ostream& ustream, BaseMatrix
@@ -127,17 +174,18 @@ ostream& my_manip(ostream& s)
 	return s;
 }
 
-class Derived_matrix : public BaseMatrix 
+class DerivedMatrix : public BaseMatrix 
 {
 public:
-	Derived_matrix(int Height = 2, int Width = 2) : BaseMatrix(Height, Width) {};
+	DerivedMatrix(int Height = 2, int Width = 2) : BaseMatrix(Height, Width) {};
 	void random_fill(int min= -50, int max = 50) {
 		for (int i = 0; i < height; i++)
 			for (int j = 0; j < width; j++)
 				ptr[i][j] = (double)(rand() % (max+1-min) ) + min;
 	}
 
-	Derived_matrix delete_zero_lines() const {
+	// Функция для первого задания - "Удалить из матрицы все нулевые строки и столбцы."
+	DerivedMatrix delete_zero_lines() const {
 		int new_h = height;
 		bool* current_row_is_zero = new bool[height]; //Обычный массив компилятор не даёт создать
 
@@ -179,14 +227,10 @@ public:
 		}
 
 		if (new_h == 0 || new_w == 0) {
-			cout << "Похоже, что вы подали на вход нулевую матриц\n";
-			Derived_matrix ans(1, 1);
-			ans(0, 0) = 0;
-			return ans;
+			throw ZeroMatrixException("Ошибка в delete_zero_lines()\n", height, width);
 		}
 
-		
-		Derived_matrix ans(new_h, new_w);
+		DerivedMatrix ans(new_h, new_w);
 
 		int new_matrix_i = 0;
 		for (int i = 0; i < height; ++i) {
@@ -220,10 +264,24 @@ int main()
 	//srand(time(0));
 	srand(1);
 
-	Derived_matrix m1(3, 3);
+	DerivedMatrix m1(3, 3);
 	m1.random_fill(0, 2);
 	m1(0, 0) = 0; m1(0, 1) = 0; m1(0, 2) = 0; m1(1, 2) = 0; m1(2, 2) = 0;
 	m1.print();
-	Derived_matrix m2 = m1.delete_zero_lines();
+	DerivedMatrix m2 = m1.delete_zero_lines();
 	m2.print();
+
+	try
+	{
+		m1.random_fill(0, 0);
+		DerivedMatrix m3 = m1.delete_zero_lines();
+	}
+	catch (ZeroMatrixException e) {
+		e.print();
+		//Дальнейшая обработка исключение - например, перегенерация матрицы m1
+	}
+	catch (...)
+	{
+		cout << "Невыловленная ошибка\n";
+	}
 }
