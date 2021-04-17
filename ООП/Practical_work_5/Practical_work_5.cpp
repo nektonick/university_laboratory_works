@@ -199,6 +199,7 @@ istream& operator >> (istream& s, BaseMatrix& m)
 
 	return s;
 }
+
 ostream& my_manip(ostream& s)
 {
 	s.precision(4);
@@ -216,6 +217,48 @@ public:
 			for (int j = 0; j < width; j++)
 				ptr[i][j] = (double)(rand() % (max+1-min) ) + min;
 	}
+
+	DerivedMatrix(istream& s){
+		cout << "DerivedMatrix(istream& s)\n";
+		s >> this->height >> this->width;
+
+		if (height <= 0 || width <= 0)
+			throw WrongMatrixSizeException("Ошибка в конструкторе BaseMatrix(int Height = 2, int Width = 2)\n", height, width);
+		ptr = new double* [height];
+		for (int i = 0; i < height; i++)
+			ptr[i] = new double[width];
+
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+					s >> ptr[i][j];
+			}
+		}
+	}
+
+	void overwrite_from_stream(istream& s) {
+		if (ptr != nullptr)
+		{
+			for (int i = 0; i < height; i++)
+				delete[] ptr[i];
+			delete[] ptr;
+			ptr = nullptr;
+		}
+
+		s >> this->height >> this->width;
+
+		if (height <= 0 || width <= 0)
+			throw WrongMatrixSizeException("Ошибка в конструкторе BaseMatrix(int Height = 2, int Width = 2)\n", height, width);
+		ptr = new double* [height];
+		for (int i = 0; i < height; i++)
+			ptr[i] = new double[width];
+
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				s >> ptr[i][j];
+			}
+		}
+	}
+
 
 	// Функция для первого задания - "Удалить из матрицы все нулевые строки и столбцы."
 	DerivedMatrix delete_zero_lines() const {
@@ -349,5 +392,23 @@ int main()
 		std::cout << "file not opened\n";
 	}
 
+
+	
+	fin.open(file_name);
+	if (fin) {
+		cout << "Создаём матрицу m4, передавая в качестве аргумента поток\n";
+		DerivedMatrix m4(fin);
+		m4.print();
+		cout << "m2 до перезаписи из файла:\n";
+		m2.print();
+		m2.overwrite_from_stream(fin);
+		cout << "m2 после перезаписи из файла:\n";
+		m2.print();
+	}
+	else {
+		std::cout << "file not opened\n";
+	}
+
+	
 
 }
