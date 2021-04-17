@@ -75,11 +75,11 @@ public:
 	}
 };
 
-
+template <typename T>
 class BaseMatrix
 {
 protected:
-	double** ptr;
+	T** ptr;
 	int height;
 	int width;
 public:
@@ -89,19 +89,19 @@ public:
 			throw WrongMatrixSizeException("Ошибка в конструкторе BaseMatrix(int Height = 2, int Width = 2)\n", Height, Width);
 		height = Height;
 		width = Width;
-		ptr = new double* [height];
+		ptr = new T* [height];
 		for (int i = 0; i < height; i++)
-			ptr[i] = new double[width];
+			ptr[i] = new T[width];
 	}
 	BaseMatrix(const BaseMatrix& M)
 	{
 		cout << "Вызван конструктор копирования\n";
 		height = M.height;
 		width = M.width;
-		ptr = new double* [height];
+		ptr = new T* [height];
 		for (int i = 0; i < height; i++)
 		{
-			ptr[i] = new double[width];
+			ptr[i] = new T[width];
 			for (int j = 0; j < width; j++)
 				ptr[i][j] = M.ptr[i][j];
 		}
@@ -126,15 +126,20 @@ public:
 			cout << "\n";
 		}
 	}
-	virtual double& operator()(int row, int column) const
+	virtual T& operator()(int row, int column) const
 	{
 		if (row < 0 || column < 0 || row >= height || column >= width)throw IndexOutOfBoundsException("Ошибка в operator()(int row, int column)\n", row, column);
 		return ptr[row][column];
 	}
-	friend ostream& operator << (ostream& s, BaseMatrix& m);
-	friend istream& operator >> (istream& s, BaseMatrix& m);
+
+	template<typename T1>
+	friend ostream& operator << (ostream& s, BaseMatrix<T1>& m);
+	template<typename T1>
+	friend istream& operator >> (istream& s, BaseMatrix<T1>& m);
 };
-ostream& operator << (ostream& s, BaseMatrix& m)
+
+template <typename T1>
+ostream& operator << (ostream& s, BaseMatrix<T1>& m)
 {
 	if (typeid(s) != typeid(ofstream)) {
 		for (int i = 0; i < m.height; i++) {
@@ -156,7 +161,9 @@ ostream& operator << (ostream& s, BaseMatrix& m)
 	}
 	return s;
 }
-istream& operator >> (istream& s, BaseMatrix& m)
+
+template <typename T1>
+istream& operator>> (istream& s, BaseMatrix<T1>& m)
 {
 	if (typeid(s) != typeid(ifstream)) {
 		for (int i = 0; i < m.height; i++) {
@@ -208,53 +215,56 @@ ostream& my_manip(ostream& s)
 	return s;
 }
 
-class DerivedMatrix : public BaseMatrix 
+template <typename T1>
+class DerivedMatrix : public BaseMatrix <T1>
 {
+	
 public:
-	DerivedMatrix(int Height = 2, int Width = 2) : BaseMatrix(Height, Width) {};
+	DerivedMatrix(int Height = 2, int Width = 2) : BaseMatrix<T1>(Height, Width) {};
 	void random_fill(int min= -50, int max = 50) {
-		for (int i = 0; i < height; i++)
-			for (int j = 0; j < width; j++)
-				ptr[i][j] = (double)(rand() % (max+1-min) ) + min;
+		
+		for (int i = 0; i < this->height; i++)
+			for (int j = 0; j < this->width; j++)
+				this->ptr[i][j] = (T1)(rand() % (max+1-min) ) + min;
 	}
 
 	DerivedMatrix(istream& s){
 		cout << "DerivedMatrix(istream& s)\n";
 		s >> this->height >> this->width;
 
-		if (height <= 0 || width <= 0)
-			throw WrongMatrixSizeException("Ошибка в конструкторе BaseMatrix(int Height = 2, int Width = 2)\n", height, width);
-		ptr = new double* [height];
-		for (int i = 0; i < height; i++)
-			ptr[i] = new double[width];
+		if (this->height <= 0 || this->width <= 0)
+			throw WrongMatrixSizeException("Ошибка в конструкторе BaseMatrix(int Height = 2, int Width = 2)\n", this->height, this->width);
+		this->ptr = new T1 * [this->height];
+		for (int i = 0; i < this->height; i++)
+			this->ptr[i] = new T1[this->width];
 
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-					s >> ptr[i][j];
+		for (int i = 0; i < this->height; i++) {
+			for (int j = 0; j < this->width; j++) {
+					s >> this->ptr[i][j];
 			}
 		}
 	}
 
 	void overwrite_from_stream(istream& s) {
-		if (ptr != nullptr)
+		if (this->ptr != nullptr)
 		{
-			for (int i = 0; i < height; i++)
-				delete[] ptr[i];
-			delete[] ptr;
-			ptr = nullptr;
+			for (int i = 0; i < this->height; i++)
+				delete[] this->ptr[i];
+			delete[] this->ptr;
+			this->ptr = nullptr;
 		}
 
 		s >> this->height >> this->width;
 
-		if (height <= 0 || width <= 0)
-			throw WrongMatrixSizeException("Ошибка в конструкторе BaseMatrix(int Height = 2, int Width = 2)\n", height, width);
-		ptr = new double* [height];
-		for (int i = 0; i < height; i++)
-			ptr[i] = new double[width];
+		if (this->height <= 0 || this->width <= 0)
+			throw WrongMatrixSizeException("Ошибка в конструкторе BaseMatrix(int Height = 2, int Width = 2)\n", this->height, this->width);
+		this->ptr = new T1 * [this->height];
+		for (int i = 0; i < this->height; i++)
+			this->ptr[i] = new T1[this->width];
 
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				s >> ptr[i][j];
+		for (int i = 0; i < this->height; i++) {
+			for (int j = 0; j < this->width; j++) {
+				s >> this->ptr[i][j];
 			}
 		}
 	}
@@ -262,16 +272,16 @@ public:
 
 	// Функция для первого задания - "Удалить из матрицы все нулевые строки и столбцы."
 	DerivedMatrix delete_zero_lines() const {
-		int new_h = height;
-		bool* current_row_is_zero = new bool[height]; //Обычный массив компилятор не даёт создать
+		int new_h = this->height;
+		bool* current_row_is_zero = new bool[this->height]; //Обычный массив компилятор не даёт создать
 
 
 		// Сначала пройдёмся по всем строкам и поймём, сколько у нас ненулевых
 		// Помечаем также в current_row_is_zero строки как нулевые или ненулевые
-		for (int i = 0; i < height; ++i) {
+		for (int i = 0; i < this->height; ++i) {
 			bool zero_row = true;
-			for (int j = 0; j < width; ++j) {
-				if (ptr[i][j] != 0) {
+			for (int j = 0; j < this->width; ++j) {
+				if (this->ptr[i][j] != 0) {
 					zero_row = false;
 					current_row_is_zero[i] = false;
 					break;
@@ -284,13 +294,13 @@ public:
 		}
 
 		// Аналогично для столбцов
-		int new_w = width;
-		bool* current_column_is_zero = new bool[width];
+		int new_w = this->width;
+		bool* current_column_is_zero = new bool[this->width];
 		
-		for (int i = 0; i < width; ++i) {
+		for (int i = 0; i < this->width; ++i) {
 			bool zero_column = true;
-			for (int j = 0; j < height; ++j) {
-				if (ptr[j][i] != 0) {
+			for (int j = 0; j < this->height; ++j) {
+				if (this->ptr[j][i] != 0) {
 					zero_column = false;
 					current_column_is_zero[i] = false;
 					break;
@@ -303,22 +313,22 @@ public:
 		}
 
 		if (new_h == 0 || new_w == 0) {
-			throw ZeroMatrixException("Ошибка в delete_zero_lines()\n", height, width);
+			throw ZeroMatrixException("Ошибка в delete_zero_lines()\n", this->height, this->width);
 		}
 
-		DerivedMatrix ans(new_h, new_w);
+		DerivedMatrix<T1> ans(new_h, new_w);
 
 		int new_matrix_i = 0;
-		for (int i = 0; i < height; ++i) {
+		for (int i = 0; i < this->height; ++i) {
 			if (current_row_is_zero[i]) {
 				continue;
 			}
 			int new_matrix_j = 0;
-			for (int j = 0; j < width; ++j) {
+			for (int j = 0; j < this->width; ++j) {
 				if (current_column_is_zero[j]) {
 					continue;
 				}
-				ans(new_matrix_i, new_matrix_j) = ptr[i][j];
+				ans(new_matrix_i, new_matrix_j) = this->ptr[i][j];
 				++new_matrix_j;
 			}
 			++new_matrix_i;
@@ -340,17 +350,17 @@ int main()
 	//srand(time(0));
 	srand(1);
 
-	DerivedMatrix m1(3, 3);
+	DerivedMatrix<double> m1(3, 3);
 	m1.random_fill(0, 2);
 	m1(0, 0) = 0; m1(0, 1) = 0; m1(0, 2) = 0; m1(1, 2) = 0; m1(2, 2) = 0;
 	m1.print();
-	DerivedMatrix m2 = m1.delete_zero_lines();
+	DerivedMatrix<double> m2 = m1.delete_zero_lines();
 	m2.print();
 
 	try
 	{
 		m1.random_fill(0, 0);
-		DerivedMatrix m3 = m1.delete_zero_lines();
+		DerivedMatrix<double> m3 = m1.delete_zero_lines();
 	}
 	catch (ZeroMatrixException e) {
 		e.print();
@@ -361,7 +371,7 @@ int main()
 		cout << "Невыловленная ошибка\n";
 	}
 
-	DerivedMatrix m3(3, 3);
+	DerivedMatrix<double> m3(3, 3);
 	m3.random_fill(-5, 5);
 	cout << "m3, записываемая в файл (2 раза)\n";
 	m3.print();
@@ -391,13 +401,11 @@ int main()
 	else {
 		std::cout << "file not opened\n";
 	}
-
-
 	
 	fin.open(file_name);
 	if (fin) {
 		cout << "Создаём матрицу m4, передавая в качестве аргумента поток\n";
-		DerivedMatrix m4(fin);
+		DerivedMatrix<double> m4(fin);
 		m4.print();
 		cout << "m2 до перезаписи из файла:\n";
 		m2.print();
