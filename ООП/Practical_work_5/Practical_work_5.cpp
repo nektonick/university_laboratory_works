@@ -131,40 +131,73 @@ public:
 		if (row < 0 || column < 0 || row >= height || column >= width)throw IndexOutOfBoundsException("Ошибка в operator()(int row, int column)\n", row, column);
 		return ptr[row][column];
 	}
-	friend ostream& operator << (ostream& ustream, BaseMatrix
-		obj);
-	friend istream& operator >> (istream& ustream, BaseMatrix&
-		obj);
+	friend ostream& operator << (ostream& s, BaseMatrix& m);
+	friend istream& operator >> (istream& s, BaseMatrix& m);
 };
-ostream& operator << (ostream& ustream, BaseMatrix obj)
+ostream& operator << (ostream& s, BaseMatrix& m)
 {
-	//ustream<<my_manip;
-	if (typeid(ustream).name() == typeid(ofstream).name())
-	{
-		ustream << obj.height << " " << obj.width << "\n";
-		for (int i = 0; i < obj.height; i++)
-		{
-			for (int j = 0; j < obj.width; j++)
-				ustream << obj.ptr[i][j] << "\n";
+	if (typeid(s) != typeid(ofstream)) {
+		for (int i = 0; i < m.height; i++) {
+			for (int j = 0; j < m.width; j++) {
+				s << m.ptr[i][j] << " ";
+			}
+			s << "\n";
 		}
-		return ustream;
 	}
-	for (int i = 0; i < obj.height; i++)
-	{
-		for (int j = 0; j < obj.width; j++)
-			ustream << obj.ptr[i][j] << " ";
-		ustream << "\n";
+	else {
+		s << " " << m.height << " " << m.width << " ";
+		for (int i = 0; i < m.height; i++) {
+			for (int j = 0; j < m.width; j++) {
+				s << m.ptr[i][j];
+				if (m.height != i + 1 || m.width != j + 1)
+					s << " ";
+			}
+		}
 	}
-	return ustream;
+	return s;
 }
-istream& operator >> (istream& ustream, BaseMatrix& obj)
+istream& operator >> (istream& s, BaseMatrix& m)
 {
-	if (typeid(ustream) == typeid(ifstream))
-		ustream >> obj.height >> obj.width;
-	for (int i = 0; i < obj.height; i++)
-		for (int j = 0; j < obj.width; j++)
-			ustream >> obj.ptr[i][j];
-	return ustream;
+	if (typeid(s) != typeid(ifstream)) {
+		for (int i = 0; i < m.height; i++) {
+			for (int j = 0; j < m.width; j++) {
+				try {
+					s >> m.ptr[i][j];
+				}
+				catch (...) {
+					cout << "wrong input\n";
+				}
+			}
+		}
+	}
+	else { //Сначала считываются высота, ширина, потом ячейки
+		int h, w;
+		s >> h >> w;
+		if (h == m.height && w == m.width) {
+			for (int i = 0; i < m.height; i++) {
+				for (int j = 0; j < m.width; j++) {
+					try {
+						s >> m.ptr[i][j];
+					}
+					catch (...) {
+						cout << "wrong input\n";
+					}
+				}
+			}
+
+		}
+		else {
+			if (s.eof()) {
+				cout << "NO MATRIX ELEMENTS\n";
+			}
+			else {
+				cout<<"Размеры не совпадают\n";
+			}
+
+		}
+	}
+
+	return s;
 }
 ostream& my_manip(ostream& s)
 {
@@ -284,4 +317,37 @@ int main()
 	{
 		cout << "Невыловленная ошибка\n";
 	}
+
+	DerivedMatrix m3(3, 3);
+	m3.random_fill(-5, 5);
+	cout << "m3, записываемая в файл (2 раза)\n";
+	m3.print();
+
+
+	string file_name = "test1.txt";
+	ofstream fout(file_name);
+
+	if (fout.is_open()) {
+		fout << m3 << m3;
+		fout.close();
+	}
+	else {
+		std::cout << "file not opened\n";
+	}
+
+	ifstream fin(file_name);
+	if (fin) {
+		while (!fin.eof())
+		{
+			fin >> m3;
+			cout << "m3, считанная из файла\n";
+			m3.print();
+		}
+		fin.close();
+	}
+	else {
+		std::cout << "file not opened\n";
+	}
+
+
 }
