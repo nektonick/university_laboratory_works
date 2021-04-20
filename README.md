@@ -7,7 +7,7 @@
     - [Практическая работа 2](ООП/Practical_work_2/Practical_work_2.cpp) [зачтено]
     - [Практическая работа 3](ООП/Practical_work_3/Practical_work_3.cpp) [зачтено]
     - [Практическая работа 4](ООП/Practical_work_4/Practical_work_4.cpp) [зачтено]
-    - [Практическая работа 5](ООП/Practical_work_5/Practical_work_5.cpp) 
+    - [Практическая работа 5](ООП/Practical_work_5/Practical_work_5.cpp) [зачтено]
   - ### Дополнительные задачи
     - Связный список
       - [Условие](ООП/List/Задание.pdf)
