@@ -26,9 +26,11 @@ public:
 };
 ostream& operator<<(ostream& s, Date d) {
 	s << d.day << "." << d.mounth << "." << d.year;
+	return s;
 }
 ostream& operator>>(ostream& s, Date d) {
 	s >> d.day >> d.mounth >> d.year;
+	return s;
 }
 
 /*
@@ -62,8 +64,55 @@ public:
 ostream& operator<<(ostream& s, Patient p) {
 	s << "Фамилия:" << p.surname << " Имя:" << p.name << " Дата рождения:" << p.date_of_birth << " Номер телефона:" << p.phone_number 
 		<< " Дом. адресс:" << p.address << " Номер мед. карты:" << p.сard_number << " Группа крови:" << p.blood_type;
+	return s;
 }
 
 ostream& operator>>(ostream& s, Patient p) {
 	s >> p.surname >> p.name >> p.date_of_birth >> p.phone_number >> p.address >> p.сard_number >> p.blood_type;
+	return s;
+}
+
+
+/*
+Шаблонный класс элемента связного списка.
+В моём варианте поле info будет иметь тип Patient.
+*/
+template<class T>
+class Element
+{	
+public:
+	T info;
+	Element* next;
+	Element* prev;
+
+	Element(T data)
+	{
+		next = prev = NULL;
+		info = data;
+	}
+
+	Element(Element* Next, Element* Prev, T data)
+	{
+		next = Next;
+		prev = Prev;
+		info = data;
+	}
+
+	Element(const Element& el)
+	{
+		next = el.next;
+		prev = el.prev;
+		info = el.info;
+	}
+
+	//template<class T>
+	friend ostream& operator<<(ostream& s, Element<T>& el);
+
+};
+
+template<class T>
+ostream& operator<<(ostream& s, Element<T>& el)
+{
+	s << el.info;
+	return s;
 }
