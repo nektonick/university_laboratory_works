@@ -523,24 +523,27 @@ public:
 	Stack<T1>* filter_recursive(bool (*criterion)(const T1& value_to_comparison, const T2 param), const T2 param_for_search_in_value,
 						        Element<T1>* start_from = nullptr, Stack<T1>* stack_for_ans = nullptr) {
 		
+		// Инициализация если последние 2 параметра не передали
 		if (stack_for_ans == nullptr && start_from == nullptr) {
-
-			
 			start_from = this->head;
-			stack_for_ans = new Stack<T1>;
-			
+			stack_for_ans = new Stack<T1>
 		}
+
+		// Инициализация, если не дали только последний параметр
 		if (stack_for_ans == nullptr) {
 			stack_for_ans = new Stack<T1>;
 		}
 
+		// База рекурсии
 		if (start_from == nullptr) {
 			return stack_for_ans;
 		}
+
+		// Добавление элемента
 		if (criterion(start_from->info, param_for_search_in_value)) {
 			stack_for_ans->push(start_from->info);
 		}
-			
+		
 		return filter_recursive(criterion, param_for_search_in_value, start_from->next, stack_for_ans);
 	}
 };
