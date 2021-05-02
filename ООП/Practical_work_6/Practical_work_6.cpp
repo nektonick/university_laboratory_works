@@ -205,7 +205,7 @@ public:
 
 	virtual ~LinkedList()
 	{
-		//cout << __FUNCTION__ << endl;
+		cout << __FUNCTION__ << endl;
 		Element<T>* cur = this->head;
 		while (cur != nullptr) {
 			Element<T>* to_delete = cur;
@@ -294,7 +294,7 @@ public:
 	}
 
 	virtual ~Stack() {
-		//cout << __FUNCTION__ <<endl;
+		cout << __FUNCTION__ <<endl;
 
 		Element<T1>* cur = this->head;
 		while (cur != nullptr) {
@@ -526,7 +526,7 @@ public:
 		// Инициализация если последние 2 параметра не передали
 		if (stack_for_ans == nullptr && start_from == nullptr) {
 			start_from = this->head;
-			stack_for_ans = new Stack<T1>
+			stack_for_ans = new Stack<T1>;
 		}
 
 		// Инициализация, если не дали только последний параметр
@@ -611,7 +611,15 @@ int main()
 		e.print();
 	}
 
-	
-	
+	cout << "\n~~~No cast~~~\n";
+	LinkedList<Patient>* base_class_ptr = new Stack<Patient>;	
+	delete base_class_ptr;
+
+	cout << "\n~~~dynamic_cast~~~\n";
+	LinkedList<Patient>* ptr_to_cast = new Stack<Patient>;
+	Stack<Patient> *casted = dynamic_cast<Stack<Patient>*>(ptr_to_cast);
+	delete casted;
+
+
 	return 0;
 }
