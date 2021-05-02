@@ -663,6 +663,15 @@ bool blood_type_filter(const Patient& p, int type = 1) {
 }
 
 
+void set_hex_manip(ostream& f) {
+	/*f.unsetf(ios::dec);
+	f.setf(ios::hex);
+	f.setf(ios::uppercase);*/
+	//Аналогично:
+	f << hex << uppercase;
+}
+
+
 int main()
 {
 	setlocale(LC_ALL, "Russian");
@@ -741,8 +750,10 @@ int main()
 	cout<< "\n~~~Readed from file~~~\n";
 	s_from_file.print_and_clear();
 	
-		
-	
+	set_hex_manip(cout);
+	Stack<Patient> s4;
+	s4.push(Patient("Логинов", "Майк", Date(10,9,1990), "8-900-900-99-99", "Северный полюс 2.", 14, 3)); 
+	s4.print_and_clear();
 
 	return 0;
 }
