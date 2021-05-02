@@ -1,7 +1,8 @@
 ﻿// КМБО-01-20, Гребнев Никита, 5 вариант.
 #include <iostream>
 #include <string>
-
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -23,13 +24,26 @@ public:
 		year = y;
 	}
 	friend ostream& operator<<(ostream& s, const Date& d);
-	friend ostream& operator>>(ostream& s, const Date& d);
+	friend istream& operator>>(istream& s, Date& d);
 };
 ostream& operator<<(ostream& s, const Date& d) {
-	s << d.day << "." << d.mounth << "." << d.year;
+	if (typeid(s) == typeid(ofstream)) {
+		s << d.day << " " << d.mounth << " " << d.year;
+	}
+	else {
+		s << d.day << "." << d.mounth << "." << d.year;
+	}
+	
 	return s;
 }
-ostream& operator>>(ostream& s, const Date& d) {
+istream& operator>>(istream& s, Date& d) {
+	if (typeid(s) == typeid(ifstream)) {
+		string line;
+		getline(s, line);
+		std::istringstream iss(line);
+		iss >> d.day >> d.mounth >> d.year;
+
+	}
 	s >> d.day >> d.mounth >> d.year;
 	return s;
 }
@@ -94,20 +108,54 @@ public:
 		--Patient::count_of_class_elements;
 	}
 	friend ostream& operator<<(ostream& s, const Patient& p);
-	friend ostream& operator>>(ostream& s, const Patient& p);
+	friend istream& operator>>(istream& s, Patient& p);
 };
 
 // Инициализируем значение статической переменной.
 int Patient::count_of_class_elements = 0; 
 
 ostream& operator<<(ostream& s, const Patient& p) {
-	s << "Фамилия: " << p.surname << "\nИмя: " << p.name << "\nДата рождения: " << p.date_of_birth << "\nНомер телефона: " << p.phone_number
-		<< "\nДом. адресс: " << p.address << "\nНомер мед. карты: " << p.сard_number << "\nГруппа крови: " << p.blood_type;
+	if (typeid(s) == typeid(ofstream)) {
+		s << p.surname << "\n" << p.name << "\n" << p.date_of_birth << "\n" << p.phone_number
+			<< "\n" << p.address << "\n" << p.сard_number << "\n" << p.blood_type;
+	}
+	else {
+		s << "Фамилия: " << p.surname << "\nИмя: " << p.name << "\nДата рождения: " << p.date_of_birth << "\nНомер телефона: " << p.phone_number
+			<< "\nДом. адресс: " << p.address << "\nНомер мед. карты: " << p.сard_number << "\nГруппа крови: " << p.blood_type;
+		
+	}
 	return s;
 }
 
-ostream& operator>>(ostream& s, const Patient& p) {
-	s >> p.surname >> p.name >> p.date_of_birth >> p.phone_number >> p.address >> p.сard_number >> p.blood_type;
+istream& operator>>(istream& s, Patient& p) {
+	if (typeid(s) == typeid(ifstream)) {
+
+		string line;
+		
+
+		getline(s, p.surname);
+		getline(s, p.name);
+		
+		getline(s, line);
+		std::istringstream iss1(line);
+		iss1 >> p.date_of_birth;
+
+		getline(s, p.phone_number);
+		getline(s, p.address);
+
+		getline(s, line);
+		std::istringstream iss2(line);
+		iss2 >> p.сard_number;
+
+		getline(s, line);
+		std::istringstream iss3(line);
+		iss3>> p.blood_type;
+	}
+	else {
+		cout << "Bad Readed:\n" << p << endl;
+		s >> p.surname >> p.name >> p.date_of_birth >> p.phone_number >> p.address >> p.сard_number >> p.blood_type;
+	}
+	
 	return s;
 }
 
@@ -123,7 +171,9 @@ public:
 	T info;
 	Element* next;
 	Element* prev;
-
+	Element() {
+		next = prev = nullptr;
+	}
 	/*Element(T data)
 	{
 		next = prev = NULL;
@@ -153,15 +203,24 @@ public:
 		info = el.info;
 	}
 
-	//template<class T>
-	friend ostream& operator<<(ostream& s, const Element<T>& el);
+	template<class T1>
+	friend ostream& operator<<(ostream& s, const Element<T1>& el);
+	template<class T1>
+	friend istream& operator>>(istream& s, Element<T1>& el);
 
 };
 
-template<class T>
-ostream& operator<<(ostream& s, const Element<T>& el)
+template<class T1>
+ostream& operator<<(ostream& s, const Element<T1>& el)
 {
 	s << el.info;
+	return s;
+}
+
+template<class T1>
+istream& operator>>(istream& s, Element<T1>& el)
+{
+	s >> el.info;
 	return s;
 }
 
@@ -268,16 +327,26 @@ public:
 		return this->tail;
 	}
 
-	//template<class T1>
-	friend ostream& operator<<(ostream& s, const LinkedList<T>& el);
+	template<class T1>
+	friend ostream& operator<<(ostream& s, const LinkedList<T1>& el);
+	template<class T1>
+	friend istream& operator>>(istream& s, const LinkedList<T1>& el);
 };
 
-template<class T>
-ostream& operator<<(ostream& s, const LinkedList<T>& el)
+template<class T1>
+ostream& operator<<(ostream& s, const LinkedList<T1>& el)
 {
-	Element<T>* current;
+	Element<T1>* current;
 	for (current = el.head; current != NULL; current = current->next)
-		s << *current << "; ";
+		s << *current << " ";
+	return s;
+}
+
+template<class T1>
+istream& operator>>(istream& s, const LinkedList<T1>& el)
+{
+	for (Element<T1>* current = el.head; current != NULL; current = current->next)
+		s >> *current;
 	return s;
 }
 
@@ -546,6 +615,31 @@ public:
 		
 		return filter_recursive(criterion, param_for_search_in_value, start_from->next, stack_for_ans);
 	}
+
+	void save_to(ofstream& s) {
+		s << this->count << endl;
+		Element<T1>* cur =  this->head;
+		for (int i = 0; i < this->count; ++i) {
+			s << (*cur) << endl;
+			cur = cur->next;
+		}
+	}
+
+	void load_from(ifstream& s) {
+		this->clear();
+		
+		int count_of_elements;
+		string line;
+		getline(s, line);
+		std::istringstream iss(line);
+		iss >> count_of_elements;
+		for (int i = 0; i < count_of_elements; ++i) {
+			T1 cur;
+			s >> cur;
+			this->push(cur);
+		}
+
+	}
 };
 
 // Функция проверки равенства имён
@@ -620,6 +714,35 @@ int main()
 	Stack<Patient> *casted = dynamic_cast<Stack<Patient>*>(ptr_to_cast);
 	delete casted;
 
+
+	Stack<Patient> s_to_file;
+	Stack<Patient> s_from_file;
+	s_to_file.push(Patient()); s_to_file.push(Patient("АААА", "FFF", Date(), "1", "", 100, 3)); s_to_file.push(Patient());
+	
+	string file_name = "test1.txt";
+	ofstream fout(file_name);
+
+	if (fout.is_open()) {
+		s_to_file.save_to(fout);
+		fout.close();
+	}
+	else {
+		std::cout << "file not opened\n";
+	}
+	ifstream fin(file_name);
+
+	if (fin.is_open()) {
+		s_from_file.load_from(fin);
+		fin.close();
+	}
+	else {
+		std::cout << "file not opened\n";
+	}
+	cout<< "\n~~~Readed from file~~~\n";
+	s_from_file.print_and_clear();
+	
+		
+	
 
 	return 0;
 }
