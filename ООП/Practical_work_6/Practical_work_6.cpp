@@ -314,7 +314,8 @@ public:
 	}
 
 	virtual bool isEmpty() const { 
-		return (this->count == 0); 
+		return (this->head == nullptr);
+		//return (this->count == 0); 
 	}
 
 	virtual int get_count() {
@@ -434,7 +435,8 @@ public:
 
 		Element<T1>* ans = this->tail;
 
-		if (this->count == 1) {
+		//if (this->count == 1) {
+		if (this->head == this->tail){
 			this->head = nullptr;
 			this->tail = nullptr;
 		}
@@ -721,6 +723,7 @@ int main()
 	cout << "\n~~~dynamic_cast~~~\n";
 	LinkedList<Patient>* ptr_to_cast = new Stack<Patient>;
 	Stack<Patient> *casted = dynamic_cast<Stack<Patient>*>(ptr_to_cast);
+	casted->print_and_clear();
 	delete casted;
 
 
