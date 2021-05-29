@@ -248,12 +248,13 @@ public:
 		return *this;
 	}
 
-	ListIterator& operator++(int) {
+	// непонятно, почему следует писать ListIterator operator++(int), а не ListIterator& operator++(int) (с амперсантом)
+	ListIterator operator++(int) {
 		ListIterator temp(*this);
 		this->operator++();
 		return temp;
 	}
-	ListIterator& operator--(int) {
+	ListIterator operator--(int) {
 		ListIterator temp(*this);
 		this->operator--();
 		return temp;
@@ -833,10 +834,7 @@ void test9_2() {
 	int i = list1.get_count() * 2;
 	auto iter = list1.begin();
 	while (i > 0) {
-		cout << *iter << endl;
-		++iter;
-		// Если пользоваться постфиксным инкрементом, то возникает ошибка доступа к памяти, не знаю, где именно баг 
-		// cout << *(iter++) << endl;
+		cout << *(iter++) << endl;
 		--i;
 	}
 }
